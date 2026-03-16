@@ -1,0 +1,1 @@
+# Keep this directory so the snapshot bind mount exists. Put snapshot repo contents here, then run the Ansible playbook to register + restore.

@@ -1,0 +1,38 @@
+# Generated from Ignition inventory — do not edit by hand; run Generate-Config to refresh.
+# Broker: {{ broker }} | ES: {{ elasticsearch_url }} | Keycloak: {{ keycloak_url }}
+
+spring:
+  application:
+    name: ${APP_NAME:app}
+
+  # Message broker (ActiveMQ or Kafka from inventory defaults.broker)
+{% if broker == 'activemq' %}
+  activemq:
+    broker-url: {{ broker_url }}
+  jms:
+    cache:
+      enabled: true
+{% else %}
+  kafka:
+    bootstrap-servers: {{ broker_url }}
+    consumer:
+      group-id: ${spring.application.name}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+{% endif %}
+
+  # Elasticsearch (from inventory)
+  elasticsearch:
+    uris: {{ elasticsearch_url }}
+
+# Keycloak (from inventory)
+keycloak:
+  auth-server-url: {{ keycloak_url }}/realms/master
+  realm: master
+  resource: ${KEYCLOAK_CLIENT_ID:ignition-client}
+  public-client: true
+
+# Server (override per module if needed)
+server:
+  port: ${SERVER_PORT:8080}

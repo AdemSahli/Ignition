@@ -1,0 +1,38 @@
+# Elasticsearch + Kibana — single-node dev stack (Docker/Podman compatible)
+# Use for inventory components "elasticsearch" and "kibana" (both point to this file).
+# Ports: 9200 (ES), 5601 (Kibana)
+#
+# Snapshot restore: host dir ./data/elasticsearch-snapshots is mounted so you can
+# place snapshot repo contents there and use the Ansible playbook to register + restore.
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: ignition-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # Allow fs snapshot repository at this path (double underscore = path.repo)
+      - ES_SETTING_PATH__REPO=/usr/share/elasticsearch/snapshots
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      # Bind mount so you can copy/paste snapshot data from host; Ansible can register + restore
+      - ./data/elasticsearch-snapshots:/usr/share/elasticsearch/snapshots
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: ignition-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+volumes:
+  elasticsearch_data:

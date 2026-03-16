@@ -1,0 +1,19 @@
+{
+  "defaults": {
+    "runtime": "podman",
+    "broker": "activemq"
+  },
+  "components": [
+    { "id": "broker-activemq", "type": "infra", "name": "ActiveMQ", "group": "infra", "composeFile": "compose/broker-activemq.yml" },
+    { "id": "broker-kafka", "type": "infra", "name": "Kafka", "group": "infra", "composeFile": "compose/broker-kafka.yml", "enabled": false },
+    { "id": "elasticsearch", "type": "infra", "name": "Elasticsearch", "group": "infra", "composeFile": "compose/elasticsearch-kibana.yml" },
+    { "id": "kibana", "type": "infra", "name": "Kibana", "group": "infra", "composeFile": "compose/elasticsearch-kibana.yml" },
+    { "id": "keycloak", "type": "infra", "name": "Keycloak", "group": "infra", "composeFile": "compose/keycloak.yml" },
+    { "id": "service-auth", "type": "module.springboot", "name": "Auth Service", "group": "backend", "path": "C:\\dev\\app\\service-auth", "port": 8081, "command": "mvn spring-boot:run", "profile": "dev" },
+    { "id": "service-api", "type": "module.springboot", "name": "API Gateway (backend)", "group": "backend", "path": "C:\\dev\\app\\service-api", "port": 8080, "command": "mvn spring-boot:run", "profile": "dev" },
+    { "id": "app-gateway", "type": "module.angular", "name": "Gateway UI", "group": "frontend", "path": "C:\\dev\\app\\apps\\gateway", "port": 4200, "command": "ng serve" },
+    { "id": "app-admin", "type": "module.angular", "name": "Admin UI", "group": "frontend", "path": "C:\\dev\\app\\apps\\admin", "port": 4201, "command": "ng serve --port 4201" },
+    { "id": "my-desktop-app", "type": "module.process", "name": "My Desktop App", "group": "tools", "path": "C:\\Tools\\MyApp", "command": "MyApp.exe" },
+    { "id": "monitoring", "type": "monitoring", "name": "Grafana + Prometheus", "group": "monitoring", "composeFile": "compose/monitoring.yml", "enabled": false }
+  ]
+}

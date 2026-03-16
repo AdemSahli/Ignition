@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Ignition CLI launcher (macOS/Linux). Delegates to: python3 -m ignition.cli
+set -e
+REPO_ROOT="${IGNITION_REPO:-$(pwd)}"
+cd "$REPO_ROOT"
+exec python3 -m ignition.cli --repo-root "$REPO_ROOT" "$@"

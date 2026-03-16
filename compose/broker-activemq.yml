@@ -1,0 +1,19 @@
+# ActiveMQ Classic — message broker for dev (Docker/Podman compatible)
+# Select via inventory: enable this component and set defaults.broker: activemq
+# Ports: 61616 (OpenWire), 8161 (Web console)
+
+services:
+  activemq:
+    image: apache/activemq-classic:latest
+    container_name: ignition-activemq
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - activemq_data:/data/activemq
+      - activemq_log:/var/log/activemq
+    restart: unless-stopped
+
+volumes:
+  activemq_data:
+  activemq_log:

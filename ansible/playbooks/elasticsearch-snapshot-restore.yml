@@ -1,0 +1,73 @@
+---
+# Register a fs snapshot repository and optionally restore a snapshot.
+# Elasticsearch must be running (e.g. started via Ignition Up).
+# Host dir data/elasticsearch-snapshots is mounted at /usr/share/elasticsearch/snapshots in the container.
+#
+# Usage (from repo root, with Ansible in WSL or on PATH):
+#   ansible-playbook ansible/playbooks/elasticsearch-snapshot-restore.yml
+#   ansible-playbook ansible/playbooks/elasticsearch-snapshot-restore.yml -e "snapshot_name=my_snapshot"
+#   ansible-playbook ansible/playbooks/elasticsearch-snapshot-restore.yml -e "snapshot_repo=my_repo snapshot_name=backup_1"
+#
+# Vars:
+#   es_host: Elasticsearch URL (default http://localhost:9200)
+#   snapshot_repo: Repository name to register (default local_repo)
+#   snapshot_name: Snapshot to restore (optional; if not set, only register repo and list snapshots)
+#   restore_indices: Optional comma-separated list of indices to restore (default: restore all)
+
+- name: Elasticsearch snapshot repository and restore
+  hosts: localhost
+  connection: local
+  vars:
+    es_host: "{{ es_host | default('http://localhost:9200') }}"
+    snapshot_repo: "{{ snapshot_repo | default('local_repo') }}"
+    snapshot_name: "{{ snapshot_name | default('') }}"
+    restore_indices: "{{ restore_indices | default('') }}"
+    # Path inside the container (bind-mounted from data/elasticsearch-snapshots)
+    snapshot_location: "/usr/share/elasticsearch/snapshots"
+  tasks:
+    - name: Register fs snapshot repository
+      ansible.builtin.uri:
+        url: "{{ es_host }}/_snapshot/{{ snapshot_repo }}"
+        method: PUT
+        body_format: json
+        body:
+          type: fs
+          settings:
+            location: "{{ snapshot_location }}"
+        status_code: [200, 201]
+        timeout: 10
+      register: register_repo
+      ignore_errors: true
+
+    - name: Fail if Elasticsearch is not reachable
+      ansible.builtin.fail:
+        msg: "Elasticsearch not reachable at {{ es_host }}. Start the stack with Ignition Up (elasticsearch component) first."
+      when: register_repo.failed | default(false) | bool
+
+    - name: List snapshots in repository
+      ansible.builtin.uri:
+        url: "{{ es_host }}/_snapshot/{{ snapshot_repo }}/_all?ignore_unavailable=true"
+        method: GET
+        return_content: true
+      register: list_snapshots
+      ignore_errors: true
+
+    - name: Show available snapshots
+      ansible.builtin.debug:
+        msg: "Available snapshots in {{ snapshot_repo }}: {{ (list_snapshots.json.snapshots | default([]) | map(attribute='snapshot') | list) | join(', ') or 'none' }}"
+      when: list_snapshots.json is defined
+
+    - name: Restore snapshot
+      ansible.builtin.uri:
+        url: "{{ es_host }}/_snapshot/{{ snapshot_repo }}/{{ snapshot_name }}/_restore"
+        method: POST
+        body_format: json
+        body: "{{ restore_indices | length > 0 | ternary({'indices': restore_indices}, {}) }}"
+        status_code: [200, 201]
+        timeout: 60
+      when: snapshot_name | length > 0
+
+    - name: Snapshot restore triggered
+      ansible.builtin.debug:
+        msg: "Restore of {{ snapshot_name }} from {{ snapshot_repo }} triggered. Check Elasticsearch or Kibana for progress."
+      when: snapshot_name | length > 0

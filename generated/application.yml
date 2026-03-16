@@ -1,0 +1,28 @@
+# Generated from Ignition inventory — do not edit by hand; run Generate-Config to refresh.
+# Broker: activemq | ES: http://localhost:9200 | Keycloak: http://localhost:8080
+
+spring:
+  application:
+    name: ${APP_NAME:app}
+
+  # Message broker (ActiveMQ or Kafka from inventory defaults.broker)
+  activemq:
+    broker-url: tcp://localhost:61616
+  jms:
+    cache:
+      enabled: true
+
+  # Elasticsearch (from inventory)
+  elasticsearch:
+    uris: http://localhost:9200
+
+# Keycloak (from inventory)
+keycloak:
+  auth-server-url: http://localhost:8080/realms/master
+  realm: master
+  resource: ${KEYCLOAK_CLIENT_ID:ignition-client}
+  public-client: true
+
+# Server (override per module if needed)
+server:
+  port: ${SERVER_PORT:8080}

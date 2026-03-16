@@ -1,0 +1,14 @@
+// Generated from Ignition inventory — do not edit by hand; run Generate-Config to refresh.
+// Broker: {{ broker }} | API: {{ keycloak_url }}
+
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080',
+  keycloak: {
+    url: '{{ keycloak_url }}',
+    realm: 'master',
+    clientId: 'ignition-client'
+  },
+  elasticsearchUrl: '{{ elasticsearch_url }}',
+  broker: '{{ broker }}'
+};

@@ -1,0 +1,51 @@
+---
+# Generate application.yml and environment.ts from Ignition inventory.
+# Run from repo root or ansible/playbooks/ with inventory at repo root.
+# From PowerShell (WSL): wsl -e bash -c "cd /path/to/ignition && ansible-playbook ansible/playbooks/generate-config.yml -e inventory_path=inventory.yaml"
+
+- name: Load inventory and generate config files
+  hosts: localhost
+  connection: local
+  vars:
+    repo_root: "{{ repo_root }}"
+    inventory_file: "{{ repo_root }}/inventory.yaml"
+    generated_dir: "{{ repo_root }}/generated"
+    broker: activemq
+    broker_url: tcp://localhost:61616
+    elasticsearch_url: "http://localhost:9200"
+    keycloak_url: "http://localhost:8080"
+  tasks:
+    - name: Load Ignition inventory
+      ansible.builtin.include_vars:
+        file: "{{ inventory_file }}"
+        name: ignition
+      ignore_errors: true
+      register: inv_load
+      run_once: true
+
+    - name: Set derived URLs from inventory defaults
+      ansible.builtin.set_fact:
+        broker: "{{ (ignition.defaults | default({})).broker | default('activemq') }}"
+        broker_url: "{{ 'tcp://localhost:61616' if ((ignition.defaults | default({})).broker | default('activemq')) == 'activemq' else 'localhost:9092' }}"
+        elasticsearch_url: "http://localhost:9200"
+        keycloak_url: "http://localhost:8080"
+      when: inv_load is succeeded and ignition is defined
+      run_once: true
+
+    - name: Create generated directory
+      ansible.builtin.file:
+        path: "{{ generated_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Generate application.yml (Spring Boot)
+      ansible.builtin.template:
+        src: ../templates/application.yml.j2
+        dest: "{{ generated_dir }}/application.yml"
+        mode: "0644"
+
+    - name: Generate environment.ts (Angular)
+      ansible.builtin.template:
+        src: ../templates/environment.ts.j2
+        dest: "{{ generated_dir }}/environment.ts"
+        mode: "0644"

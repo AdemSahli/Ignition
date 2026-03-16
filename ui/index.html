@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ignition</title>
+  <link rel="icon" href="/ignition.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --fg: #e0e0e0;
+      --muted: #888;
+      --border: #333;
+      --accent: #4a9eff;
+      --primary: #4a9eff;
+      --danger: #e06c75;
+      --success: #7bc67e;
+      --card-bg: #222;
+      --radius: 6px;
+      --radius-sm: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      margin: 0;
+      padding: 0;
+      font-size: 0.9375rem;
+      line-height: 1.45;
+      display: flex;
+      flex-direction: row;
+      min-height: 100vh;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 1.25rem 2rem 2rem;
+    }
+
+    .header {
+      margin-bottom: 1.25rem;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-logo {
+      height: 2.5rem;
+      width: auto;
+      vertical-align: middle;
+      object-fit: contain;
+    }
+
+    .header-subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .defaults {
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .defaults span+span::before {
+      content: ' · ';
+      color: var(--border);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      padding: 0.5rem 1rem;
+      min-height: 36px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--fg);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .toolbar button:hover {
+      background: #2a2a2a;
+      border-color: #444;
+    }
+
+    .toolbar button.primary {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .toolbar button.primary:hover {
+      background: rgba(74, 158, 255, 0.1);
+    }
+
+    .toolbar button.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .toolbar button.danger:hover {
+      background: rgba(224, 108, 117, 0.1);
+    }
+
+    .section {
+      margin-bottom: 1.75rem;
+    }
+
+    .content-empty {
+      color: var(--muted);
+      padding: 1.5rem;
+      margin: 0;
+      font-size: 0.9375rem;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .section-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .section-table th,
+    .section-table td {
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .section-table th {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .section-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .section-table tr.expandable:hover {
+      background: #282828;
+    }
+
+    .section-table .col-expand {
+      width: 2rem;
+    }
+
+    .section-table .col-name {
+      min-width: 140px;
+    }
+
+    .section-table .col-status {
+      width: 6rem;
+    }
+
+    .pill-status-running {
+      color: var(--success);
+    }
+
+    .pill-status-stopped {
+      color: var(--muted);
+    }
+
+    .pill-status-na {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .section-table .col-type {
+      width: 120px;
+    }
+
+    .section-table .col-enabled {
+      width: 80px;
+    }
+
+    .section-table .col-detail {
+      color: var(--muted);
+      font-size: 0.8125rem;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: Consolas, monospace;
+    }
+
+    .section-table .col-actions {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    .btn-expand {
+      padding: 0.2rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    .btn-expand:hover {
+      color: var(--fg);
+      background: #333;
+    }
+
+    .btn-expand[aria-expanded="true"] {
+      transform: rotate(90deg);
+      color: var(--accent);
+    }
+
+    .name-cell .name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .name-cell .name {
+      font-weight: 500;
+    }
+
+    .name-cell .id {
+      font-family: Consolas, monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .pill-type {
+      background: #2a2a2a;
+      color: var(--muted);
+      font-family: Consolas, monospace;
+    }
+
+    .pill-enabled {
+      background: rgba(74, 158, 255, 0.2);
+      color: var(--accent);
+    }
+
+    .pill-disabled {
+      background: rgba(136, 136, 136, 0.2);
+      color: var(--muted);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .row-actions button {
+      padding: 0.35rem 0.65rem;
+      min-height: 32px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--fg);
+      border-radius: var(--radius-sm);
+    }
+
+    .row-actions button:hover {
+      background: #333;
+    }
+
+    .detail-row td {
+      padding: 0.85rem 1rem;
+      background: #1a1a1a;
+      border-top: none;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .detail-row:last-child td {
+      border-bottom: none;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.35rem 1.25rem;
+      font-size: 0.8125rem;
+      font-family: Consolas, monospace;
+    }
+
+    .detail-grid .k {
+      color: var(--muted);
+    }
+
+    .detail-grid .v {
+      word-break: break-all;
+    }
+
+    .detail-actions {
+      margin-top: 0.75rem;
+    }
+
+    .detail-actions a {
+      display: inline-block;
+      margin-right: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.8125rem;
+    }
+
+    .detail-actions a:hover {
+      text-decoration: underline;
+    }
+
+    .sidebar {
+      width: 380px;
+      flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      resize: horizontal;
+      max-width: 50vw;
+      min-width: 200px;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+      border-left: none;
+      min-width: 0;
+    }
+
+    .sidebar-header {
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .log-panel {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .log-entries {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .log-entry {
+      padding: 0.6rem 0.75rem;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: Consolas, monospace;
+      font-size: 0.8rem;
+    }
+
+    .log-entry.running {
+      border-color: var(--primary);
+      background: rgba(13, 110, 253, 0.06);
+    }
+
+    .log-entry.error {
+      border-color: var(--danger);
+      background: rgba(220, 53, 69, 0.08);
+    }
+
+    .log-entry.success {
+      border-color: var(--success);
+    }
+
+    .log-entry-head {
+      font-weight: 600;
+      font-size: 0.75rem;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .log-entry-head .badge {
+      font-weight: 500;
+    }
+
+    .log-entry-body {
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-entry-body:empty {
+      display: none;
+    }
+
+    .log-empty {
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.8125rem;
+      margin: 0;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading {
+      color: var(--muted);
+    }
+
+    #content-loading {
+      padding: 1.5rem;
+      color: var(--muted);
+    }
+
+    #content-error {
+      padding: 1.5rem;
+      color: var(--danger);
+    }
+
+    .icon {
+      display: inline-block;
+      width: 1.125rem;
+      height: 1.125rem;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    .icon use {
+      fill: currentColor;
+    }
+
+    .btn-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .header-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pill .icon {
+      width: 0.75rem;
+      height: 0.75rem;
+      margin-right: 0.25rem;
+      vertical-align: -0.1em;
+    }
+
+    .btn-info {
+      padding: 0.25rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-radius: var(--radius-sm);
+      line-height: 0;
+    }
+
+    .btn-info:hover {
+      color: var(--accent);
+      background: rgba(74, 158, 255, 0.15);
+    }
+
+    .btn-info .icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .info-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .info-modal-overlay[hidden] {
+      display: none;
+    }
+
+    .info-modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .info-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-modal-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .info-modal-close {
+      padding: 0.25rem 0.5rem;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-radius: var(--radius-sm);
+    }
+
+    .info-modal-close:hover {
+      color: var(--fg);
+      background: #333;
+    }
+
+    .info-modal-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      font-size: 0.875rem;
+    }
+
+    .info-modal-body .info-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.4rem 1.5rem;
+      align-items: baseline;
+    }
+
+    .info-modal-body .info-k {
+      color: var(--muted);
+      font-size: 0.8125rem;
+    }
+
+    .info-modal-body .info-v {
+      word-break: break-all;
+      font-family: Consolas, monospace;
+      font-size: 0.8125rem;
+    }
+
+    .info-modal-body .info-section {
+      margin-bottom: 1rem;
+    }
+
+    .info-modal-body .info-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-modal-body .info-section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .info-modal-body .info-link {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .info-modal-body .info-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;">
+    <symbol id="icon-logo" viewBox="0 0 24 24">
+      <path
+        d="M12 2L4 6v6l8 4 8-4V6l-8-4zm0 2.18l6 3v4.64l-6 3-6-3V7.18l6-3zM4 13.82l8 4v4.64l-8-4v-4.64zm16 0v4.64l-8 4v-4.64l8-4z" />
+    </symbol>
+    <symbol id="icon-status" viewBox="0 0 24 24">
+      <path
+        d="M3 5h2v2H3V5zm4 0h14v2H7V5zM3 9h2v2H3V9zm4 0h14v2H7V9zM3 13h2v2H3v-2zm4 0h14v2H7v-2zM3 17h2v2H3v-2zm4 0h14v2H7v-2z" />
+    </symbol>
+    <symbol id="icon-up" viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7L8 5z" />
+    </symbol>
+    <symbol id="icon-down" viewBox="0 0 24 24">
+      <path d="M6 6h12v12H6z" />
+    </symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24">
+      <path
+        d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z" />
+    </symbol>
+    <symbol id="icon-refresh" viewBox="0 0 24 24">
+      <path
+        d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+    </symbol>
+    <symbol id="icon-running" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="6" fill="currentColor" />
+    </symbol>
+    <symbol id="icon-stopped" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2" />
+    </symbol>
+    <symbol id="icon-log" viewBox="0 0 24 24">
+      <path
+        d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+    </symbol>
+    <symbol id="icon-name" viewBox="0 0 24 24">
+      <path
+        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+    </symbol>
+    <symbol id="icon-detail" viewBox="0 0 24 24">
+      <path d="M3 5v14h18V5H3zm16 6h-4v4h-4v-4H5V7h4V3h4v4h4v4z" />
+    </symbol>
+    <symbol id="icon-type" viewBox="0 0 24 24">
+      <path
+        d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z" />
+    </symbol>
+    <symbol id="icon-enabled" viewBox="0 0 24 24">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+    </symbol>
+    <symbol id="icon-expand-right" viewBox="0 0 24 24">
+      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+    </symbol>
+    <symbol id="icon-expand-down" viewBox="0 0 24 24">
+      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+    </symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+    </symbol>
+  </svg>
+  <div id="info-modal-overlay" class="info-modal-overlay" hidden aria-hidden="true">
+    <div class="info-modal" role="dialog" aria-labelledby="info-modal-title" aria-modal="true">
+      <div class="info-modal-header">
+        <h2 id="info-modal-title" class="info-modal-title"></h2>
+        <button type="button" class="info-modal-close" data-action="close-info-modal"
+          aria-label="Close">&times;</button>
+      </div>
+      <div class="info-modal-body" id="info-modal-body"></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <h1 class="header-with-icon">
+        <img src="/ignition.svg" alt="" class="header-logo">
+        Ignition
+      </h1>
+      <p class="header-subtitle">Start and stop services from one place</p>
+      <div class="defaults" id="defaults"></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn-with-icon" data-action="status" title="Check status of all components"><svg class="icon"
+          aria-hidden="true">
+          <use href="#icon-status" />
+        </svg> Status</button>
+      <button class="btn-with-icon primary" data-action="up-all" title="Start all components"><svg class="icon"
+          aria-hidden="true">
+          <use href="#icon-up" />
+        </svg> Up All</button>
+      <button class="btn-with-icon danger" data-action="down-all" title="Stop all components"><svg class="icon"
+          aria-hidden="true">
+          <use href="#icon-down" />
+        </svg> Down All</button>
+      <button class="btn-with-icon" data-action="generate-config" title="Generate configuration"><svg class="icon"
+          aria-hidden="true">
+          <use href="#icon-gear" />
+        </svg> Generate-Config</button>
+      <button class="btn-with-icon" data-action="refresh" title="Refresh component list and status"><svg class="icon"
+          aria-hidden="true">
+          <use href="#icon-refresh" />
+        </svg> Refresh</button>
+      <button class="btn-with-icon" data-action="toggle-sidebar" title="Toggle log sidebar"><svg class="icon"
+          aria-hidden="true">
+          <use href="#icon-log" />
+        </svg> Toggle Log</button>
+    </div>
+    <div id="content">
+      <div id="content-loading">Loading…</div>
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="sidebar-header header-with-icon"><svg class="icon" aria-hidden="true">
+        <use href="#icon-log" />
+      </svg>Log</div>
+    <div class="log-panel">
+      <div id="log-entries" class="log-entries">
+        <p class="log-empty" id="log-empty">Run a command to see output here.</p>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    const logEntriesEl = document.getElementById('log-entries');
+    const contentEl = document.getElementById('content');
+    const defaultsEl = document.getElementById('defaults');
+    const sidebarEl = document.querySelector('.sidebar');
+
+    const GROUP_ORDER = ['infra', 'backend', 'frontend', 'monitoring', 'Other'];
+    const QUICK_LINK_PORTS = {
+      'broker-activemq': 8161,
+      'elasticsearch': 9200,
+      'kibana': 5601,
+      'keycloak': 8080,
+      'monitoring': 3000
+    };
+    // Port(s) and labels for info modal (main port first for "Open" link)
+    const SERVICE_PORTS = {
+      'broker-activemq': [{ port: 61616, label: 'OpenWire' }, { port: 8161, label: 'Web console' }],
+      'broker-kafka': [{ port: 9092, label: 'Kafka' }, { port: 2181, label: 'Zookeeper' }],
+      'elasticsearch': [{ port: 9200, label: 'API' }],
+      'kibana': [{ port: 5601, label: 'UI' }],
+      'keycloak': [{ port: 8080, label: 'HTTP' }],
+      'monitoring': [{ port: 3000, label: 'Grafana' }]
+    };
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function detailShort(c) {
+      if (c.composeFile) return c.composeFile;
+      if (c.path) return c.path;
+      return '—';
+    }
+
+    function isCompose(c) {
+      return c.type === 'infra' || c.type === 'monitoring' || (c.composeFile != null);
+    }
+
+    function getOpenUrl(c) {
+      const port = QUICK_LINK_PORTS[c.id] != null ? QUICK_LINK_PORTS[c.id] : (c.port != null ? c.port : null);
+      if (port == null) return null;
+      return 'http://localhost:' + port;
+    }
+
+    function getServiceInfoRows(c) {
+      const rows = [];
+      const knownPorts = SERVICE_PORTS[c.id];
+      const componentPort = c.port != null ? Number(c.port) : null;
+      const portEntries = [];
+      if (knownPorts && knownPorts.length) {
+        knownPorts.forEach(p => portEntries.push(p.port + (p.label ? ' (' + p.label + ')' : '')));
+      }
+      if (componentPort != null && (!knownPorts || !knownPorts.some(p => p.port === componentPort))) {
+        portEntries.push(componentPort + ' (from inventory)');
+      }
+      if (portEntries.length) {
+        rows.push({ k: 'Port(s)', v: portEntries.join(', ') });
+      } else if (componentPort != null) {
+        rows.push({ k: 'Port', v: String(componentPort) });
+      }
+      ['id', 'name', 'type', 'group', 'enabled', 'path', 'command', 'composeFile', 'runtime', 'profile', 'args'].forEach(key => {
+        let v = c[key];
+        if (v === undefined || v === null) return;
+        if (key === 'enabled') v = v ? 'Yes' : 'No';
+        if (Array.isArray(v)) v = v.join(', ');
+        rows.push({ k: key, v: String(v) });
+      });
+      return rows;
+    }
+
+    function showInfoModal(c) {
+      const overlay = document.getElementById('info-modal-overlay');
+      const titleEl = document.getElementById('info-modal-title');
+      const bodyEl = document.getElementById('info-modal-body');
+      if (!overlay || !titleEl || !bodyEl) return;
+      titleEl.textContent = (c.name || c.id) + ' — Service info';
+      const rows = getServiceInfoRows(c);
+      let html = '<div class="info-grid">';
+      rows.forEach(r => {
+        html += '<div class="info-k">' + escapeHtml(r.k) + '</div><div class="info-v">' + escapeHtml(r.v) + '</div>';
+      });
+      html += '</div>';
+      const openUrl = getOpenUrl(c);
+      if (openUrl) {
+        html += '<div class="info-section" style="margin-top:1rem;"><a class="info-link" href="' + escapeHtml(openUrl) + '" target="_blank" rel="noopener">Open → ' + escapeHtml(openUrl) + '</a></div>';
+      }
+      bodyEl.innerHTML = html;
+      overlay.hidden = false;
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeInfoModal() {
+      const overlay = document.getElementById('info-modal-overlay');
+      if (overlay) {
+        overlay.hidden = true;
+        overlay.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    function groupComponents(components) {
+      const byGroup = {};
+      components.forEach(c => {
+        const g = (c.group && String(c.group).trim()) || 'Other';
+        if (!byGroup[g]) byGroup[g] = [];
+        byGroup[g].push(c);
+      });
+      const ordered = [];
+      GROUP_ORDER.forEach(g => {
+        if (byGroup[g]) ordered.push({ name: g, components: byGroup[g] });
+      });
+      Object.keys(byGroup).filter(g => !GROUP_ORDER.includes(g)).sort().forEach(g => {
+        ordered.push({ name: g, components: byGroup[g] });
+      });
+      return ordered;
+    }
+
+    function renderDefaults(inv) {
+      if (!inv || !inv.defaults) { defaultsEl.textContent = ''; return; }
+      const d = inv.defaults;
+      const parts = [];
+      if (d.runtime) parts.push('<span>Runtime: ' + escapeHtml(d.runtime) + '</span>');
+      if (d.broker) parts.push('<span>Broker: ' + escapeHtml(d.broker) + '</span>');
+      defaultsEl.innerHTML = parts.join('');
+    }
+
+    function renderDetailFields(c) {
+      const rows = [];
+      ['id', 'type', 'group', 'enabled', 'path', 'port', 'command', 'composeFile', 'runtime', 'profile', 'args'].forEach(k => {
+        let v = c[k];
+        if (v === undefined || v === null) return;
+        if (k === 'enabled') v = v ? 'true' : 'false';
+        if (Array.isArray(v)) v = v.join(', ');
+        rows.push('<div class="k">' + escapeHtml(k) + '</div><div class="v">' + escapeHtml(String(v)) + '</div>');
+      });
+      return '<div class="detail-grid">' + rows.join('') + '</div>';
+    }
+
+    async function api(path, options = {}) {
+      const r = await fetch(path, options);
+      const text = await r.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = text; }
+      if (!r.ok) {
+        const msg = (data && data.error) ? data.error : (text || r.statusText);
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function safeIdFragment(id) {
+      return String(id).replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+    function toggleExpand(expandButton) {
+      try {
+        if (!expandButton || !expandButton.closest) return;
+        const row = expandButton.closest('tr');
+        if (!row) return;
+        const detailRow = row.nextElementSibling;
+        if (!detailRow || !detailRow.classList.contains('detail-row')) return;
+        const willBeExpanded = detailRow.hidden;
+        detailRow.hidden = !detailRow.hidden;
+        expandButton.setAttribute('aria-expanded', willBeExpanded ? 'true' : 'false');
+      } catch (_) { /* avoid any expand/collapse crash */ }
+    }
+
+    async function refresh() {
+      contentEl.innerHTML = '<div id="content-loading">Loading…</div>';
+      try {
+        const inv = await api('/api/components');
+        if (inv && inv.error) {
+          contentEl.innerHTML = '<div id="content-error">' + escapeHtml(inv.error) + '</div>';
+          return;
+        }
+        let statusMap = {};
+        try {
+          const statusRes = await api('/api/status');
+          if (statusRes && statusRes.status) statusMap = statusRes.status;
+        } catch (_) { /* status optional */ }
+        renderDefaults(inv);
+        const components = inv && inv.components ? inv.components : [];
+        const groups = groupComponents(components);
+        const componentById = {};
+        components.forEach(c => { if (c && c.id) componentById[c.id] = c; });
+        let html = '';
+        groups.forEach(grp => {
+          html += '<div class="section"><div class="section-title">' + escapeHtml(grp.name) + '</div>';
+          html += '<table class="section-table"><thead><tr>';
+          html += '<th class="col-expand"></th>';
+          html += '<th class="col-name"><span class="header-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-name"/></svg>Name</span></th>';
+          html += '<th class="col-type"><span class="header-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-type"/></svg>Type</span></th>';
+          html += '<th class="col-enabled"><span class="header-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-enabled"/></svg>Enabled</span></th>';
+          html += '<th class="col-status"><span class="header-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-status"/></svg>Status</span></th>';
+          html += '<th class="col-detail"><span class="header-with-icon"><svg class="icon" aria-hidden="true"><use href="#icon-detail"/></svg>Detail</span></th>';
+          html += '<th class="col-actions"></th>';
+          html += '</tr></thead><tbody>';
+          grp.components.forEach(c => {
+            const enabled = c.enabled !== false;
+            const openUrl = getOpenUrl(c);
+            const rowId = safeIdFragment(c.id);
+            const runStatus = statusMap[c.id];
+            let statusHtml = '—';
+            if (runStatus === 'running') statusHtml = '<span class="pill pill-status-running"><svg class="icon" aria-hidden="true"><use href="#icon-running"/></svg>running</span>';
+            else if (runStatus === 'stopped') statusHtml = '<span class="pill pill-status-stopped"><svg class="icon" aria-hidden="true"><use href="#icon-stopped"/></svg>stopped</span>';
+            else if (runStatus === 'n/a') statusHtml = '<span class="pill pill-status-na">n/a</span>';
+            html += '<tr class="expandable"><td class="col-expand">';
+            html += '<button type="button" class="btn-expand" data-action="expand" data-expand-id="' + rowId + '" aria-expanded="false" aria-label="Toggle details"><svg class="icon" aria-hidden="true"><use href="#icon-expand-right"/></svg></button>';
+            html += '</td><td class="col-name name-cell">';
+            html += '<div class="name-row"><span class="name">' + escapeHtml(c.name || c.id) + '</span>';
+            html += '<button type="button" class="btn-info" data-action="info" data-component-id="' + escapeHtml(c.id) + '" title="Service info (port and details)" aria-label="Service info">';
+            html += '<svg class="icon" aria-hidden="true"><use href="#icon-info"/></svg></button></div>';
+            html += '<div class="id">' + escapeHtml(c.id) + '</div>';
+            html += '</td><td class="col-type"><span class="pill pill-type">' + escapeHtml(c.type || '') + '</span></td>';
+            html += '<td class="col-enabled"><span class="pill ' + (enabled ? 'pill-enabled">enabled' : 'pill-disabled">disabled') + '</span></td>';
+            html += '<td class="col-status">' + statusHtml + '</td>';
+            html += '<td class="col-detail" title="' + escapeHtml(detailShort(c)) + '">' + escapeHtml(detailShort(c)) + '</td>';
+            html += '<td class="col-actions"><div class="row-actions">';
+            html += '<button class="btn-with-icon" data-action="up" data-id="' + escapeHtml(c.id) + '" title="Start this service"><svg class="icon" aria-hidden="true"><use href="#icon-up"/></svg>Up</button>';
+            if (isCompose(c) || (c.type && String(c.type).startsWith('module.'))) html += '<button class="btn-with-icon" data-action="down" data-id="' + escapeHtml(c.id) + '" title="Stop this service"><svg class="icon" aria-hidden="true"><use href="#icon-down"/></svg>Down</button>';
+            html += '</div></td></tr>';
+            html += '<tr id="detail-' + rowId + '" class="detail-row" hidden><td colspan="7">';
+            html += renderDetailFields(c);
+            if (openUrl) html += '<div class="detail-actions"><a href="' + escapeHtml(openUrl) + '" target="_blank" rel="noopener">Open →</a></div>';
+            html += '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+        });
+        if (groups.length === 0) html = '<p class="content-empty">No components in inventory.</p>';
+        contentEl.innerHTML = html;
+
+        contentEl.querySelectorAll('[data-action="expand"]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const targetBtn = e.target.closest && e.target.closest('[data-action="expand"]');
+            if (targetBtn) toggleExpand(targetBtn);
+          });
+        });
+        contentEl.querySelectorAll('[data-action="info"]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-component-id');
+            const c = id ? componentById[id] : null;
+            if (c) showInfoModal(c);
+          });
+        });
+      } catch (e) {
+        contentEl.innerHTML = '<div id="content-error">' + escapeHtml(e.message) + '</div>';
+      }
+    }
+
+    const MAX_LOG_ENTRIES = 30;
+
+    function commandLabel(cmd, componentId) {
+      if (componentId) return cmd + ' ' + componentId;
+      return cmd;
+    }
+
+    function addLogEntry(opts) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry' + (opts.running ? ' running' : '') + (opts.error ? ' error' : '') + (opts.success ? ' success' : '');
+      const label = opts.label || 'Command';
+      let head = '<span class="log-entry-head">';
+      if (opts.running) head += '<span class="spinner" aria-hidden="true"></span>';
+      else if (opts.error) head += '<span class="badge pill-disabled">Error</span>';
+      else head += '<span class="badge pill-enabled">Done</span>';
+      head += '<span>' + escapeHtml(label) + '</span></span>';
+      const body = (opts.body != null && opts.body !== '') ? '<div class="log-entry-body">' + escapeHtml(opts.body) + '</div>' : '';
+      entry.innerHTML = head + body;
+      const emptyEl = document.getElementById('log-empty');
+      if (emptyEl) emptyEl.hidden = true;
+      logEntriesEl.prepend(entry);
+      const entries = logEntriesEl.querySelectorAll('.log-entry');
+      for (let i = MAX_LOG_ENTRIES; i < entries.length; i++) entries[i].remove();
+      return entry;
+    }
+
+    function updateLogEntry(entry, body, isError) {
+      entry.classList.remove('running');
+      entry.classList.add(isError ? 'error' : 'success');
+      const head = entry.querySelector('.log-entry-head');
+      if (head) {
+        const spinner = head.querySelector('.spinner');
+        if (spinner) spinner.remove();
+        const badge = head.querySelector('.badge');
+        if (badge) {
+          badge.textContent = isError ? 'Error' : 'Done';
+          badge.className = 'badge ' + (isError ? 'pill-disabled' : 'pill-enabled');
+        }
+      }
+      let bodyEl = entry.querySelector('.log-entry-body');
+      if (bodyEl) bodyEl.textContent = body || '';
+      else {
+        bodyEl = document.createElement('div');
+        bodyEl.className = 'log-entry-body';
+        bodyEl.textContent = body || '';
+        entry.appendChild(bodyEl);
+      }
+    }
+
+    async function runCommand(command, componentId) {
+      const label = commandLabel(command, componentId);
+      const entry = addLogEntry({ label: label, running: true });
+      try {
+        const body = { command };
+        if (componentId) body.componentId = componentId;
+        const res = await api('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (res.error) updateLogEntry(entry, res.error, true);
+        else {
+          updateLogEntry(entry, (res.output != null && res.output !== '') ? res.output : 'Done.', false);
+          if (command === 'Up' || command === 'Down' || command === 'Status') refresh();
+        }
+      } catch (e) {
+        updateLogEntry(entry, e.message || String(e), true);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeInfoModal();
+    });
+    document.body.addEventListener('click', (e) => {
+      const a = e.target.getAttribute('data-action');
+      const id = e.target.getAttribute('data-id');
+      if (a === 'close-info-modal') closeInfoModal();
+      else if (e.target.id === 'info-modal-overlay') closeInfoModal();
+      else if (a === 'refresh') refresh();
+      else if (a === 'status') runCommand('Status');
+      else if (a === 'up-all') runCommand('Up');
+      else if (a === 'down-all') runCommand('Down');
+      else if (a === 'generate-config') runCommand('Generate-Config');
+      else if (a === 'toggle-sidebar') sidebarEl.classList.toggle('collapsed');
+      else if (a === 'up' && id) runCommand('Up', id);
+      else if (a === 'down' && id) runCommand('Down', id);
+    });
+
+    refresh();
+  </script>
+</body>
+
+</html>
